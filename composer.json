@@ -1,0 +1,12 @@
+{
+    "name": "bandit/swiftpass",
+    "homepage": "https://github.com/banditsmile/swiftpass",
+    "description": "Íþ¸»Í¨Ö§¸¶sdk",
+    "authors": [
+        {
+            "name": "banditsmile",
+            "email": "banditsmile@qq.com"
+        }
+    ],
+    "require": {}
+}
