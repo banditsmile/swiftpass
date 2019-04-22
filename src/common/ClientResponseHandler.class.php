@@ -1,5 +1,6 @@
 <?php
 
+namespace bandit\swiftpass\common;
 /**
  * 后台应答类
  * ============================================================================
@@ -34,11 +35,11 @@ class ClientResponseHandler  {
 	//原始内容
 	var $content;
 	
-	function __construct() {
+	public function __construct() {
 		$this->ClientResponseHandler();
 	}
 	
-	function ClientResponseHandler() {
+	public function ClientResponseHandler() {
 		$this->key = "";
 		$this->public_rsa_key = "";
 		$this->signtype = "";
@@ -50,28 +51,28 @@ class ClientResponseHandler  {
 	/**
 	*获取密钥
 	*/
-	function getKey() {
+    public function getKey() {
 		return $this->key;
 	}
 	
 	/**
 	*设置密钥
-	*/	
-	function setKey($key) {
+	*/
+    public function setKey($key) {
 		$this->key = $key;
 	}
 
 	/*设置威富通公钥*/
-	function setRSAKey($key) {
+    public function setRSAKey($key) {
 		$this->public_rsa_key = $key;
 	}
 
-	function setSignType($type) {
+    public function setSignType($type) {
 		$this->signtype = $type;
 	}
 	
 	//设置原始内容
-	function setContent($content) {
+    public function setContent($content) {
 		$this->content = $content;
 		
 		libxml_disable_entity_loader(true);
@@ -102,21 +103,21 @@ class ClientResponseHandler  {
 	}
 	
 	//获取原始内容
-	function getContent() {
+    public function getContent() {
 		return $this->content;
 	}
 	
 	/**
 	*获取参数值
-	*/	
-	function getParameter($parameter) {
+	*/
+    public function getParameter($parameter) {
 		return isset($this->parameters[$parameter])?$this->parameters[$parameter] : '';
 	}
 	
 	/**
 	*设置参数值
-	*/	
-	function setParameter($parameter, $parameterValue) {
+	*/
+    public function setParameter($parameter, $parameterValue) {
 		$this->parameters[$parameter] = $parameterValue;
 	}
 	
@@ -124,7 +125,7 @@ class ClientResponseHandler  {
 	*获取所有请求的参数
 	*@return array
 	*/
-	function getAllParameters() {
+    public function getAllParameters() {
 		return $this->parameters;
 	}	
 	
@@ -132,8 +133,8 @@ class ClientResponseHandler  {
 	*是否威富通签名,规则是:按参数名称a-z排序,遇到空值的参数不参加签名。
 	*true:是
 	*false:否
-	*/	
-	function isTenpaySign() {
+	*/
+    public function isTenpaySign() {
 		$swiftpassSign = strtolower($this->getParameter("sign"));
 		if ($this->getParameter('sign_type') == 'MD5') {
 			return $this->getMD5Sign() == $swiftpassSign;
@@ -142,7 +143,7 @@ class ClientResponseHandler  {
 		}
 	}
 
-	function getMD5Sign() {
+    public function getMD5Sign() {
 		$signPars = "";
 		ksort($this->parameters);
 		foreach($this->parameters as $k => $v) {
@@ -155,7 +156,7 @@ class ClientResponseHandler  {
 		return strtolower(md5($signPars));
 	}
 
-	function verifyRSASign() {
+    public function verifyRSASign() {
 		$signPars = "";
 		ksort($this->parameters);
 		foreach($this->parameters as $k => $v) {
@@ -179,13 +180,13 @@ class ClientResponseHandler  {
 	
 	/**
 	*获取debug信息
-	*/	
-	function getDebugInfo() {
+	*/
+    public function getDebugInfo() {
 		return $this->debugInfo;
 	}
 	
 	//获取xml编码
-	function getXmlEncode($xml) {
+    public function getXmlEncode($xml) {
 		$ret = preg_match ("/<?xml[^>]* encoding=\"(.*)\"[^>]* ?>/i", $xml, $arr);
 		if($ret) {
 			return strtoupper ( $arr[1] );
@@ -196,8 +197,8 @@ class ClientResponseHandler  {
 	
 	/**
 	*设置debug信息
-	*/	
-	function _setDebugInfo($debugInfo) {
+	*/
+    public function _setDebugInfo($debugInfo) {
 		$this->debugInfo = $debugInfo;
 	}
 	
@@ -205,8 +206,8 @@ class ClientResponseHandler  {
 	 * 是否财付通签名
 	 * @param signParameterArray 签名的参数数组
 	 * @return boolean
-	 */	
-	function _isTenpaySign($signParameterArray) {
+	 */
+    public function _isTenpaySign($signParameterArray) {
 	
 		$signPars = "";
 		foreach($signParameterArray as $k) {
@@ -224,10 +225,7 @@ class ClientResponseHandler  {
 		//debug信息
 		$this->_setDebugInfo($signPars . " => sign:" . $sign .
 				" tenpaySign:" . $this->getParameter("sign"));
-		
-		return $sign == $tenpaySign;		
-		
-	
+		return $sign == $tenpaySign;
 	}
 	
 }

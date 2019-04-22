@@ -1,4 +1,6 @@
 <?php
+namespace bandit\swiftpass\common;
+
 class Utils{
     /**
      * 将数据转为XML
@@ -60,7 +62,7 @@ class Utils{
     }
 
     //获取xml编码
-	function getXmlEncode($xml) {
+	public static function getXmlEncode($xml) {
 		$ret = preg_match ("/<?xml[^>]* encoding=\"(.*)\"[^>]* ?>/i", $xml, $arr);
 		if($ret) {
 			return strtoupper ( $arr[1] );
@@ -68,5 +70,42 @@ class Utils{
 			return "";
 		}
 	}
+
+    /**
+     * 生成随机字符串
+     * @return int
+     */
+	public static function nonceStr()
+    {
+        return mt_rand(time(),time()+rand());
+    }
+
+    /**
+     * 获取终端ip
+     * @return mixed|string
+     */
+    public static function remoteIp()
+    {
+        $arr_ip_header = array(
+            "HTTP_CDN_SRC_IP",
+            "HTTP_PROXY_CLIENT_IP",
+            "HTTP_WL_PROXY_CLIENT_IP",
+            "HTTP_CLIENT_IP",
+            "HTTP_X_FORWARDED_FOR",
+            "REMOTE_ADDR",
+        );
+
+        $client_ip = "";
+        foreach ($arr_ip_header as $key) {
+            if (!empty($_SERVER[$key]) && strtolower($_SERVER[$key]) != "unknown") {
+                $client_ip = $_SERVER[$key];
+                break;
+            }
+        }
+        if (false !== strpos($client_ip, ",")) {
+            $client_ip = preg_replace("/,.*/", "", $client_ip);
+        }
+        return $client_ip;
+    }
 }
 ?>

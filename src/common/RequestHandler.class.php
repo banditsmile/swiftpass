@@ -1,4 +1,5 @@
 <?php
+namespace bandit\swiftpass\common;
 /**
  * 请求类
  * ============================================================================
@@ -33,11 +34,11 @@ class RequestHandler {
 	/** debug信息 */
 	var $debugInfo;
 	
-	function __construct() {
+	public function __construct() {
 		$this->RequestHandler();
 	}
-	
-	function RequestHandler() {
+
+    public function RequestHandler() {
 		$this->gateUrl = "";
 		$this->key = "";
 		$this->private_rsa_key = "";
@@ -49,65 +50,65 @@ class RequestHandler {
 	/**
 	*初始化函数。
 	*/
-	function init() {
+    public function init() {
 		//nothing to do
 	}
 	
 	/**
 	*获取入口地址,不包含参数值
 	*/
-	function getGateURL() {
+    public function getGateURL() {
 		return $this->gateUrl;
 	}
 	
 	/**
 	*设置入口地址,不包含参数值
 	*/
-	function setGateURL($gateUrl) {
+    public function setGateURL($gateUrl) {
 		$this->gateUrl = $gateUrl;
 	}
 
-	function setSignType($type) {
+    public function setSignType($type) {
 		$this->signtype = $type;
 	}
 	
 	/**
 	*获取MD5密钥
 	*/
-	function getKey() {
+    public function getKey() {
 		return $this->key;
 	}
 	
 	/**
 	*设置MD5密钥
 	*/
-	function setKey($key) {
+    public function setKey($key) {
 		$this->key = $key;
 	}
 	
 	/*设置RSA私钥*/
-	function setRSAKey($key) {
+    public function setRSAKey($key) {
 		$this->private_rsa_key = $key;
 	}
 
 	/**
 	*获取参数值
 	*/
-	function getParameter($parameter) {
+    public function getParameter($parameter) {
 		return isset($this->parameters[$parameter])?$this->parameters[$parameter]:'';
 	}
 	
 	/**
 	*设置参数值
 	*/
-	function setParameter($parameter, $parameterValue) {
+    public function setParameter($parameter, $parameterValue) {
 		$this->parameters[$parameter] = $parameterValue;
 	}
 
     /**
      * 一次性设置参数
      */
-    function setReqParams($post,$filterField=null){
+    public function setReqParams($post,$filterField=null){
         if($filterField !== null){
             forEach($filterField as $k=>$v){
                 unset($post[$v]);
@@ -128,14 +129,14 @@ class RequestHandler {
 	*获取所有请求的参数
 	*@return array
 	*/
-	function getAllParameters() {
+    public function getAllParameters() {
 		return $this->parameters;
 	}
 	
 	/**
 	*获取带参数的请求URL
 	*/
-	function getRequestURL() {
+    public function getRequestURL() {
 	
 		$this->createSign();
 		
@@ -157,22 +158,22 @@ class RequestHandler {
 	/**
 	*获取debug信息
 	*/
-	function getDebugInfo() {
+    public function getDebugInfo() {
 		return $this->debugInfo;
 	}
 	
 	/**
 	*创建md5摘要,规则是:按参数名称a-z排序,遇到空值的参数不参加签名。
 	*/
-	function createSign() {
+    public function createSign() {
 		if($this->signtype == 'MD5') {
 			$this->createMD5Sign();
 		} else {
 			$this->createRSASign();
 		}
-	}	
+	}
 
-	function createMD5Sign() {
+    public function createMD5Sign() {
 		$signPars = "";
 		ksort($this->parameters);
 		foreach($this->parameters as $k => $v) {
@@ -188,7 +189,7 @@ class RequestHandler {
 		$this->_setDebugInfo($signPars . " => sign:" . $sign);
 	}
 
-	function createRSASign() {
+    public function createRSASign() {
 		$signPars = "";
 		ksort($this->parameters);
 		foreach($this->parameters as $k => $v) {
@@ -216,7 +217,7 @@ class RequestHandler {
 	/**
 	*设置debug信息
 	*/
-	function _setDebugInfo($debugInfo) {
+    public function _setDebugInfo($debugInfo) {
 		$this->debugInfo = $debugInfo;
 	}
 

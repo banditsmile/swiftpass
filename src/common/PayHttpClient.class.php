@@ -1,5 +1,6 @@
 <?php
 
+namespace bandit\swiftpass\common;
 /**
  * http、https通信类
  * ============================================================================
@@ -33,12 +34,12 @@ class PayHttpClient {
 	//http状态码
 	var $responseCode;
 	
-	function __construct() {
+	public function __construct() {
 		$this->PayHttpClient();
 	}
-	
-	
-	function PayHttpClient() {
+
+
+    public function PayHttpClient() {
 		$this->reqContent = "";
 		$this->resContent = "";
 		
@@ -51,28 +52,28 @@ class PayHttpClient {
 	}
 	
 	//设置请求内容
-	function setReqContent($url,$data) {
+    public function setReqContent($url,$data) {
 		$this->reqContent['url']=$url;
         $this->reqContent['data']=$data;
 	}
 	
 	//获取结果内容
-	function getResContent() {
+    public function getResContent() {
 		return $this->resContent;
 	}
 	
 	//获取错误信息
-	function getErrInfo() {
+    public function getErrInfo() {
 		return $this->errInfo;
 	}
 	
 	//设置超时时间,单位秒
-	function setTimeOut($timeOut) {
+    public function setTimeOut($timeOut) {
 		$this->timeOut = $timeOut;
 	}
 	
 	//执行http调用
-	function call() {
+    public function call() {
 		//启动一个CURL会话
 		$ch = curl_init();
 
@@ -109,8 +110,8 @@ class PayHttpClient {
 		
 		return true;
 	}
-	
-	function getResponseCode() {
+
+    public function getResponseCode() {
 		return $this->responseCode;
 	}
 	
