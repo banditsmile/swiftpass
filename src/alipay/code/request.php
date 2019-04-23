@@ -19,9 +19,9 @@ use bandit\swiftpass\common\HttpClient;
 /**
  * Class Request
  *
- * @property $resHandler  bandit\swiftpass\common\ClientResponseHandler
+ * @property $resHandler  bandit\swiftpass\common\ResponseHandler
  * @property $reqHandler  bandit\swiftpass\common\RequestHandler
- * @property $pay  bandit\swiftpass\common\PayHttpClient
+ * @property $pay  bandit\swiftpass\common\HttpClient
  * @property $cfg  bandit\swiftpass\common\Config
  * @package bandit\swiftpass\alipay\code
  */
@@ -87,7 +87,7 @@ Class Request{
     }
 
 
-    private function paramPrepare($params)
+    private function paramAppend($params, $interface)
     {
         $params = array_merge($this->conf, $params);
         $sign_type = $params['sign_type'];
@@ -101,11 +101,42 @@ Class Request{
         }
         $this->reqHandler->setSignType($sign_type);
         $this->reqHandler->setReqParams($params, array('method'));
+        if (empty($allParams['mch_create_ip'])) {
+            $this->reqHandler->setParameter('mch_create_ip', Utils::remoteIp());
+        }
+        if (empty($allParams['nonce_str'])) {
+            //随机字符串，必填项，不长于 32 位
+            $this->reqHandler->setParameter('nonce_str', Utils::nonceStr());
+        }
+        //接口类型：pay.alipay.native  表示支付宝扫码
+        $this->reqHandler->setParameter('service', $interface);
+
+        //通知地址，必填项，接收威富通通知的URL，需给绝对路径，255字符内格式如:http://wap.tenpay.com/tenpay.asp
+        //$notify_url = 'http://'.$_SERVER['HTTP_HOST'];
+
+        $this->reqHandler->createSign();//创建签名
+
+
     }
 
-    private function paramCheck($pparams, $check)
-    {
 
+    private function doRequest()
+    {
+        $data = Utils::toXml($this->reqHandler->getAllParameters());
+
+        $this->pay->setReqContent($this->reqHandler->getGateURL(), $data);
+        $ret = $this->pay->call();
+        return $ret;
+    }
+
+    private function paramCheck($params, $check)
+    {
+        $paramKeys = array_keys($params);
+        $lostParams = array_diff($check, $paramKeys);
+        if (!empty($lostParams)) {
+            return $lostParams;
+        }
+        return [];
     }
     /**
      * 提交订单信息
@@ -118,58 +149,57 @@ Class Request{
         //必选参数
         $requiredInput = ['mch_id','out_trade_no','body','total_fee','notify_url'];
         $allParams = array_merge($this->conf, $params);
-        $paramKeys = array_keys($allParams);
-        $lostParams = array_diff($requiredInput, $paramKeys);
+        $lostParams = $this->paramCheck($allParams, $requiredInput);
         if (!empty($lostParams)) {
-            return false;
+            return ['status'=>501,'msg'=>'缺少必要参数','data'=>$lostParams];
         }
 
         $this->reqHandler->setReqParams($allParams, array('method'));
-        $this->paramPrepare($allParams);
+        $this->paramAppend($allParams, $interface);
 
-        if (empty($allParams['mch_create_ip'])) {
-            $this->reqHandler->setParameter('mch_create_ip', Utils::remoteIp());
-        }
-        if (empty($allParams['nonce_str'])) {
-            //随机字符串，必填项，不长于 32 位
-            $this->reqHandler->setParameter('nonce_str', Utils::nonceStr());
-        }
-        //接口类型：pay.alipay.native  表示支付宝扫码
-        $this->reqHandler->setParameter('service', $interface);
-        
-        //通知地址，必填项，接收威富通通知的URL，需给绝对路径，255字符内格式如:http://wap.tenpay.com/tenpay.asp
-        //$notify_url = 'http://'.$_SERVER['HTTP_HOST'];
-
-        $this->reqHandler->createSign();//创建签名
-        
-        $data = Utils::toXml($this->reqHandler->getAllParameters());
-        
-        $this->pay->setReqContent($this->reqHandler->getGateURL(), $data);
-        $ret = $this->pay->call();
+        $ret = $this->doRequest();
         if (empty($ret)) {
-            echo json_encode(array('status'=>500,'msg'=>'Response Code:'.$this->pay->getResponseCode().' Error Info:'.$this->pay->getErrInfo()));
+            return ['status'=>502,'message'=>$this->pay->getErrInfo(),'data'=>[]];
         }
+        $result =  $this->pay->getResContent();
+        $result = $this->resHandler->parseContent($result);
+        return $result;
+    }
+
+    /**
+     * 请求返回结果处理
+     */
+    public function dealRes()
+    {
         $this->resHandler->setContent($this->pay->getResContent());
         $this->resHandler->setKey($this->reqHandler->getKey());
         $ret = $this->resHandler->isTenpaySign();
-        if(empty($ret)) {
-            echo json_encode(array('status'=>500,'msg'=>'Error Code:'.$this->resHandler->getParameter('status').' Error Message:'.$this->resHandler->getParameter('message')));
+        if (empty($ret)) {
+            return array(
+                'status'=>500,
+                'message'=>
+                    'Error Code:'.$this->resHandler->getParameter('status')
+                    .' Error Message:'.$this->resHandler->getParameter('message')
+            );
         }
         //当返回状态与业务结果都为0时才返回支付二维码，其它结果请查看接口文档
         $status = $this->resHandler->getParameter('status');
         $result_code =  $this->resHandler->getParameter('result_code');
         if ($status != 0 || $result_code != 0) {
-            echo json_encode(array('status'=>500,'msg'=>'Error Code:'.$this->resHandler->getParameter('err_code').' Error Message:'.$this->resHandler->getParameter('err_msg')));
-            exit();
+            return array(
+                'status'=>500,
+                'msg'=>
+                    'Error Code:'.$this->resHandler->getParameter('err_code')
+                    .' Error Message:'.$this->resHandler->getParameter('err_msg')
+            );
         }
-        $ret = array('code_img_url'=>$this->resHandler->getParameter('code_img_url'),
+        $ret = array(
+            'code_img_url'=>$this->resHandler->getParameter('code_img_url'),
             'code_url'=>$this->resHandler->getParameter('code_url'),
             'code_status'=>$this->resHandler->getParameter('code_status'),
-            'type'=>$this->reqHandler->getParameter('service'));
-
-        echo json_encode($ret, JSON_UNESCAPED_SLASHES);
-        exit();
-
+            'type'=>$this->reqHandler->getParameter('service')
+        );
+        return $ret;
     }
 
     /**

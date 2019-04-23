@@ -74,33 +74,40 @@ class ResponseHandler  {
 	//设置原始内容
     public function setContent($content) {
 		$this->content = $content;
-		
-		libxml_disable_entity_loader(true);
-		$xml = simplexml_load_string($this->content);
-		$encode = $this->getXmlEncode($this->content);
-		
-		if($xml && $xml->children()) {
-			foreach ($xml->children() as $node){
-				//有子节点
-				if($node->children()) {
-					$k = $node->getName();
-					$nodeXml = $node->asXML();
-					$v = substr($nodeXml, strlen($k)+2, strlen($nodeXml)-2*strlen($k)-5);
-					
-				} else {
-					$k = $node->getName();
-					$v = (string)$node;
-				}
-				
-				if($encode!="" && $encode != "UTF-8") {
-					$k = iconv("UTF-8", $encode, $k);
-					$v = iconv("UTF-8", $encode, $v);
-				}
-				
-				$this->setParameter($k, $v);			
-			}
-		}
+		$params = $this->parseContent($content);
+		$this->setParameters($params);
 	}
+
+	public function parseContent($content)
+    {
+        libxml_disable_entity_loader(true);
+        $xml = simplexml_load_string($content);
+        $encode = $this->getXmlEncode($content);
+
+        $result = [];
+        if($xml && $xml->children()) {
+            foreach ($xml->children() as $node){
+                //有子节点
+                if($node->children()) {
+                    $k = $node->getName();
+                    $nodeXml = $node->asXML();
+                    $v = substr($nodeXml, strlen($k)+2, strlen($nodeXml)-2*strlen($k)-5);
+
+                } else {
+                    $k = $node->getName();
+                    $v = (string)$node;
+                }
+
+                if($encode!="" && $encode != "UTF-8") {
+                    $k = iconv("UTF-8", $encode, $k);
+                    $v = iconv("UTF-8", $encode, $v);
+                }
+
+                $result[$k]=$v;
+            }
+        }
+        return $result;
+    }
 	
 	//获取原始内容
     public function getContent() {
@@ -120,6 +127,16 @@ class ResponseHandler  {
     public function setParameter($parameter, $parameterValue) {
 		$this->parameters[$parameter] = $parameterValue;
 	}
+
+    /**
+     * 设置参数
+     *
+     * @param $params
+     */
+	public function setParameters($params)
+    {
+        $this->parameters = array_merge($this->parameters, $params);
+    }
 	
 	/**
 	*获取所有请求的参数

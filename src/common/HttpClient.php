@@ -14,106 +14,115 @@ namespace bandit\swiftpass\common;
  * setTimeOut($timeOut)， 设置超时时间，单位秒
  * getResponseCode(), 取返回的http状态码
  * call(),真正调用接口
- * 
+ *
  * ============================================================================
  *
  */
 
 class HttpClient {
-	//请求内容，无论post和get，都用get方式提供
-	var $reqContent = array();
-	//应答内容
-	var $resContent;
-	
-	//错误信息
-	var $errInfo;
-	
-	//超时时间
-	var $timeOut;
-	
-	//http状态码
-	var $responseCode;
-	
-	public function __construct() {
-		$this->PayHttpClient();
-	}
+    //请求内容，无论post和get，都用get方式提供
+    var $reqContent = array();
+    //应答内容
+    var $resContent;
+
+    //错误信息
+    var $errInfo;
+
+    //超时时间
+    var $timeOut;
+
+    //http状态码
+    var $responseCode;
+
+    public function __construct()
+    {
+        $this->PayHttpClient();
+    }
 
 
-    public function PayHttpClient() {
-		$this->reqContent = "";
-		$this->resContent = "";
-		
-		$this->errInfo = "";
-		
-		$this->timeOut = 120;
-		
-		$this->responseCode = 0;
-		
-	}
-	
-	//设置请求内容
-    public function setReqContent($url,$data) {
-		$this->reqContent['url']=$url;
-        $this->reqContent['data']=$data;
-	}
-	
-	//获取结果内容
-    public function getResContent() {
-		return $this->resContent;
-	}
-	
-	//获取错误信息
-    public function getErrInfo() {
-		return $this->errInfo;
-	}
-	
-	//设置超时时间,单位秒
-    public function setTimeOut($timeOut) {
-		$this->timeOut = $timeOut;
-	}
-	
-	//执行http调用
-    public function call() {
-		//启动一个CURL会话
-		$ch = curl_init();
+    public function PayHttpClient()
+    {
+        $this->reqContent = "";
+        $this->resContent = "";
 
-		// 设置curl允许执行的最长秒数
-		curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeOut);
-        curl_setopt($ch,CURLOPT_SSL_VERIFYPEER,false);
-        curl_setopt($ch,CURLOPT_SSL_VERIFYHOST,false);
-		// 获取的信息以文件流的形式返回，而不是直接输出。
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
-		
+        $this->errInfo = "";
+
+        $this->timeOut = 120;
+
+        $this->responseCode = 0;
+
+    }
+
+    //设置请求内容
+    public function setReqContent($url, $data)
+    {
+        $this->reqContent['url'] = $url;
+        $this->reqContent['data'] = $data;
+    }
+
+    //获取结果内容
+    public function getResContent()
+    {
+        return $this->resContent;
+    }
+
+    //获取错误信息
+    public function getErrInfo()
+    {
+        return $this->errInfo;
+    }
+
+    //设置超时时间,单位秒
+    public function setTimeOut($timeOut)
+    {
+        $this->timeOut = $timeOut;
+    }
+
+    //执行http调用
+    public function call()
+    {
+        //启动一个CURL会话
+        $ch = curl_init();
+
+        // 设置curl允许执行的最长秒数
+        curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeOut);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        // 获取的信息以文件流的形式返回，而不是直接输出。
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
         //发送一个常规的POST请求。
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_URL, $this->reqContent['url']);
         //要传送的所有数据
         curl_setopt($ch, CURLOPT_POSTFIELDS, $this->reqContent['data']);
-		
-		// 执行操作
-		$res = curl_exec($ch);
-		$this->responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-		
-		if ($res == NULL) { 
-		   $this->errInfo = "call http err :" . curl_errno($ch) . " - " . curl_error($ch) ;
-		   curl_close($ch);
-		   return false;
-		} else if($this->responseCode  != "200") {
-			$this->errInfo = "call http err httpcode=" . $this->responseCode  ;
-			curl_close($ch);
-			return false;
-		}
-		
-		curl_close($ch);
-		$this->resContent = $res;
 
-		
-		return true;
-	}
+        // 执行操作
+        $res = curl_exec($ch);
+        $this->responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-    public function getResponseCode() {
-		return $this->responseCode;
-	}
-	
+        if ($res == NULL) {
+            $this->errInfo = "call http err :" . curl_errno($ch) . " - " . curl_error($ch);
+            curl_close($ch);
+            return false;
+        } else if ($this->responseCode != "200") {
+            $this->errInfo = "call http err httpcode=" . $this->responseCode;
+            curl_close($ch);
+            return false;
+        }
+
+        curl_close($ch);
+        $this->resContent = $res;
+
+
+        return true;
+    }
+
+    public function getResponseCode()
+    {
+        return $this->responseCode;
+    }
+
 }
+
 ?>
