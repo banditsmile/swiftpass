@@ -13,8 +13,8 @@ namespace bandit\swiftpass\alipay\code;
 use bandit\swiftpass\common\Utils;
 use bandit\swiftpass\common\config;
 use bandit\swiftpass\common\RequestHandler;
-use bandit\swiftpass\common\ClientResponseHandler;
-use bandit\swiftpass\common\PayHttpClient;
+use bandit\swiftpass\common\ResponseHandler;
+use bandit\swiftpass\common\HttpClient;
 
 /**
  * Class Request
@@ -29,7 +29,7 @@ Class Request{
     //$url = 'http://192.168.1.185:9000/pay/gateway';
 
     /**
-     * @var \bandit\swiftpass\common\ClientResponseHandler
+     * @var \bandit\swiftpass\common\ResponseHandler
      */
     private $resHandler = null;
     /**
@@ -37,7 +37,7 @@ Class Request{
      */
     private $reqHandler = null;
     /**
-     * @var \bandit\swiftpass\common\PayHttpClient
+     * @var \bandit\swiftpass\common\HttpClient
      */
     private $pay = null;
     /**
@@ -56,9 +56,9 @@ Class Request{
     public function __construct($conf) {
         $this->Request();
         $this->conf = $conf;
-        $this->resHandler = new ClientResponseHandler();
+        $this->resHandler = new ResponseHandler();
         $this->reqHandler = new RequestHandler();
-        $this->pay = new PayHttpClient();
+        $this->pay = new HttpClient();
         $this->reqHandler->setGateUrl($this->conf['url']);
     }
     

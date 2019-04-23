@@ -19,7 +19,7 @@ namespace bandit\swiftpass\common;
  *
  */
 
-class PayHttpClient {
+class HttpClient {
 	//请求内容，无论post和get，都用get方式提供
 	var $reqContent = array();
 	//应答内容

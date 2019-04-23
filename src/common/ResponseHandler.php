@@ -16,7 +16,7 @@ namespace bandit\swiftpass\common;
  *
  */
 
-class ClientResponseHandler  {
+class ResponseHandler  {
 	
 	/** MD5密钥 */
 	var $key;
@@ -204,7 +204,7 @@ class ClientResponseHandler  {
 	
 	/**
 	 * 是否财付通签名
-	 * @param signParameterArray 签名的参数数组
+	 * @param array $signParameterArray 签名的参数数组
 	 * @return boolean
 	 */
     public function _isTenpaySign($signParameterArray) {
