@@ -34,6 +34,11 @@ class ResponseHandler  {
 	
 	//原始内容
 	var $content;
+
+    const SUCCESS = 'success';
+    const FAIL = 'fail';
+
+    var $fail;
 	
 	public function __construct() {
 		$this->ClientResponseHandler();
@@ -244,6 +249,26 @@ class ResponseHandler  {
 				" tenpaySign:" . $this->getParameter("sign"));
 		return $sign == $tenpaySign;
 	}
+
+    /**
+     * Build xml and return the response to WeChat.
+     *
+     * @return
+     */
+    public function toResponse()
+    {
+        $base = [
+            'code' => is_null($this->fail) ? static::SUCCESS : static::FAIL,
+            'msg' => $this->fail,
+        ];
+        echo json_encode($base);
+        exit();
+    }
+
+    public function fail($message)
+    {
+        $this->fail = $message;
+    }
 	
 }
 
