@@ -2,7 +2,7 @@
 /**
  * 支付宝扫码支付
  */
-namespace bandit\swiftpass\alipay\code;
+namespace bandit\swiftpass\alipay;
 
 /**
  * 支付宝扫码支付
@@ -27,7 +27,7 @@ use bandit\swiftpass\common\HttpClient;
  * @property $cfg  bandit\swiftpass\common\Config
  * @package bandit\swiftpass\alipay\code
  */
-Class Request
+Class Qrcode
 {
     //$url = 'http://192.168.1.185:9000/pay/gateway';
 

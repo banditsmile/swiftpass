@@ -10,7 +10,7 @@
  */
 include_once  '../vendor/autoload.php';
 
-use bandit\swiftpass\alipay\code\Request;
+use bandit\swiftpass\alipay\Qrcode;
 
 Class Controller{
     //$url = 'http://192.168.1.185:9000/pay/gateway';
@@ -59,7 +59,7 @@ Class Controller{
      * 提交订单信息
      */
     public function submitOrderInfo(){
-        $request = new Request($this->cfg);
+        $request = new Qrcode($this->cfg);
         $param = [
             'out_trade_no'=>'1111184328042380',
             'body'=>'test',
@@ -75,7 +75,7 @@ Class Controller{
      * 查询订单
      */
     public function queryOrder(){
-        $request = new Request($this->cfg);
+        $request = new Qrcode($this->cfg);
         $param = [
             'out_trade_no'=>$this->get_post('out_trade_no'),
             'transaction_id'=>$this->get_post('transaction_id'),
@@ -88,7 +88,7 @@ Class Controller{
    /* 关闭订单*/
     
     public function closeOrder() {
-        $request = new Request($this->cfg);
+        $request = new Qrcode($this->cfg);
         $param = [
             'out_trade_no'=>$this->get_post('out_trade_no')
         ];
@@ -100,7 +100,7 @@ Class Controller{
      * 提交退款
      */
     public function submitRefund(){
-        $request = new Request($this->cfg);
+        $request = new Qrcode($this->cfg);
         $param = [
             'out_trade_no'=>$this->get_post('out_trade_no'),
             'out_refund_no'=>$this->get_post('out_refund_no'),
@@ -118,7 +118,7 @@ Class Controller{
      * 查询退款
      */
     public function queryRefund(){
-        $request = new Request($this->cfg);
+        $request = new Qrcode($this->cfg);
         $param = [
             'out_trade_no'=>$this->get_post('out_trade_no'),
             'transaction_id'=>$this->get_post('transaction_id'),
