@@ -270,7 +270,7 @@ Class Request{
 
         $interface = 'unified.trade.refund';
         //必选参数
-        $requiredInput = ['mch_id','total_fee','refund_fee','op_user_id'];
+        $requiredInput = ['mch_id','total_fee','refund_fee','op_user_id','out_refund_no'];
         $allParams = array_merge($this->conf, $params);
         $lostParams = $this->paramCheck($allParams, $requiredInput);
         if (!empty($lostParams)) {
