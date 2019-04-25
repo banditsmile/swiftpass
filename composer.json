@@ -3,6 +3,7 @@
     "homepage": "https://github.com/banditsmile/swiftpass",
     "description": "switfpass sdk",
     "version":"1.0.0",
+    "License":"MIT",
     "authors": [
         {
             "name": "banditsmile",
