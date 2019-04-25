@@ -1,8 +1,11 @@
 <?php
+/**
+ * 支付宝扫码支付
+ */
 namespace bandit\swiftpass\alipay\code;
 
 /**
- * 支付接口调测例子
+ * 支付宝扫码支付
  * ================================================================
  * index 进入口，方法中转
  * submitOrderInfo 提交订单信息
@@ -11,7 +14,6 @@ namespace bandit\swiftpass\alipay\code;
  * ================================================================
  */
 use bandit\swiftpass\common\Utils;
-use bandit\swiftpass\common\config;
 use bandit\swiftpass\common\RequestHandler;
 use bandit\swiftpass\common\ResponseHandler;
 use bandit\swiftpass\common\HttpClient;
@@ -25,7 +27,8 @@ use bandit\swiftpass\common\HttpClient;
  * @property $cfg  bandit\swiftpass\common\Config
  * @package bandit\swiftpass\alipay\code
  */
-Class Request{
+Class Request
+{
     //$url = 'http://192.168.1.185:9000/pay/gateway';
 
     /**
@@ -55,41 +58,30 @@ Class Request{
      * $conf.sign_type
      */
     private $conf = [];
-    
-    public function __construct($conf) {
+
+    /**
+     * Request constructor.
+     *
+     * @param array $conf 支付配置
+     */
+    public function __construct(array $conf)
+    {
         $this->conf = $conf;
         $this->resHandler = new ResponseHandler();
         $this->reqHandler = new RequestHandler();
         $this->pay = new HttpClient();
         $this->reqHandler->setGateUrl($this->conf['url']);
     }
-    
-    public function index(){
-        $method = isset($_REQUEST['method'])?$_REQUEST['method']:'submitOrderInfo';
-        switch($method){
-            case 'submitOrderInfo'://提交订单
-                $this->submitOrderInfo();
-            break;
-            case 'queryOrder'://查询订单
-                $this->queryOrder();
-            break;
-            case 'closeOrder'://关闭订单
-                $this->closeOrder();
-            break;
-            case 'submitRefund'://提交退款
-                $this->submitRefund();
-            break;
-            case 'queryRefund'://查询退款
-                $this->queryRefund();
-            break;
-            case 'callback':
-                $this->callback();
-            break;
-        }
-    }
 
-
-    private function paramAppend($params, $interface)
+    /**
+     * 补充参数
+     *
+     * @param $params
+     * @param $interface
+     *
+     * @return null
+     */
+    private function _paramAppend($params, $interface)
     {
         $params = array_merge($this->conf, $params);
         $sign_type = $params['sign_type'];
@@ -122,7 +114,12 @@ Class Request{
     }
 
 
-    private function doRequest()
+    /**
+     * 发起http请求
+     *
+     * @return mixed
+     */
+    private function _doRequest()
     {
         $data = Utils::toXml($this->reqHandler->getAllParameters());
 
@@ -131,7 +128,15 @@ Class Request{
         return $ret;
     }
 
-    private function paramCheck($params, $check)
+    /**
+     * 参数检查
+     *
+     * @param $params
+     * @param $check
+     *
+     * @return array
+     */
+    private function _paramCheck($params, $check)
     {
         $paramKeys = array_keys($params);
         $lostParams = array_diff($check, $paramKeys);
@@ -143,8 +148,9 @@ Class Request{
     /**
      * 提交订单信息
      *
-     * @param $params
+     * @param array $params 下单
      *
+     * @return array
      */
     public function order(array $params)
     {
@@ -152,15 +158,15 @@ Class Request{
         //必选参数
         $requiredInput = ['mch_id','out_trade_no','body','total_fee','notify_url'];
         $allParams = array_merge($this->conf, $params);
-        $lostParams = $this->paramCheck($allParams, $requiredInput);
+        $lostParams = $this->_paramCheck($allParams, $requiredInput);
         if (!empty($lostParams)) {
             return ['status'=>501,'msg'=>'缺少必要参数','data'=>$lostParams];
         }
 
         $this->reqHandler->setReqParams($allParams, array('method'));
-        $this->paramAppend($allParams, $interface);
+        $this->_paramAppend($allParams, $interface);
 
-        $ret = $this->doRequest();
+        $ret = $this->_doRequest();
         if (empty($ret)) {
             return ['status'=>502,'message'=>$this->pay->getErrInfo(),'data'=>[]];
         }
@@ -171,6 +177,8 @@ Class Request{
 
     /**
      * 请求返回结果处理
+     *
+     * @return array
      */
     public function dealRes()
     {
@@ -205,8 +213,13 @@ Class Request{
         return $ret;
     }
 
+
     /**
      * 查询订单
+     *
+     * @param array $params 请求参数
+     *
+     * @return array
      */
     public function queryOrder($params)
     {
@@ -214,7 +227,7 @@ Class Request{
         //必选参数
         $requiredInput = ['mch_id'];
         $allParams = array_merge($this->conf, $params);
-        $lostParams = $this->paramCheck($allParams, $requiredInput);
+        $lostParams = $this->_paramCheck($allParams, $requiredInput);
         if (!empty($lostParams)) {
             return ['status'=>501,'msg'=>'缺少必要参数','data'=>$lostParams];
         }
@@ -227,9 +240,9 @@ Class Request{
         }
 
         $this->reqHandler->setReqParams($allParams, array('method'));
-        $this->paramAppend($allParams, $interface);
+        $this->_paramAppend($allParams, $interface);
 
-        $ret = $this->doRequest();
+        $ret = $this->_doRequest();
         if (empty($ret)) {
             return ['status'=>502,'message'=>$this->pay->getErrInfo(),'data'=>[]];
         }
@@ -238,23 +251,28 @@ Class Request{
         return $result;
     }
 
-   /* 关闭订单*/
-    
-    public function closeOrder($params) {
-
+    /**
+     * 关闭订单
+     *
+     * @param array $params 请求参数
+     *
+     * @return array
+     */
+    public function closeOrder($params)
+    {
         $interface = 'unified.trade.close';
         //必选参数
         $requiredInput = ['mch_id','out_trade_no'];
         $allParams = array_merge($this->conf, $params);
-        $lostParams = $this->paramCheck($allParams, $requiredInput);
+        $lostParams = $this->_paramCheck($allParams, $requiredInput);
         if (!empty($lostParams)) {
             return ['status'=>501,'msg'=>'缺少必要参数','data'=>$lostParams];
         }
 
         $this->reqHandler->setReqParams($allParams, array('method'));
-        $this->paramAppend($allParams, $interface);
+        $this->_paramAppend($allParams, $interface);
 
-        $ret = $this->doRequest();
+        $ret = $this->_doRequest();
         if (empty($ret)) {
             return ['status'=>502,'message'=>$this->pay->getErrInfo(),'data'=>[]];
         }
@@ -263,16 +281,22 @@ Class Request{
         return $result;
 
     }
+
     /**
      * 提交退款
+     *
+     * @param array $params 请求参数
+     *
+     * @return array
      */
-    public function submitRefund($params){
-
+    public function submitRefund($params)
+    {
         $interface = 'unified.trade.refund';
         //必选参数
-        $requiredInput = ['mch_id','total_fee','refund_fee','op_user_id','out_refund_no'];
+        $requiredInput = ['mch_id','total_fee','refund_fee','op_user_id',
+            'out_refund_no'];
         $allParams = array_merge($this->conf, $params);
-        $lostParams = $this->paramCheck($allParams, $requiredInput);
+        $lostParams = $this->_paramCheck($allParams, $requiredInput);
         if (!empty($lostParams)) {
             return ['status'=>501,'msg'=>'缺少必要参数','data'=>$lostParams];
         }
@@ -285,9 +309,9 @@ Class Request{
         }
 
         $this->reqHandler->setReqParams($allParams, array('method'));
-        $this->paramAppend($allParams, $interface);
+        $this->_paramAppend($allParams, $interface);
 
-        $ret = $this->doRequest();
+        $ret = $this->_doRequest();
         if (empty($ret)) {
             return ['status'=>502,'message'=>$this->pay->getErrInfo(),'data'=>[]];
         }
@@ -297,14 +321,19 @@ Class Request{
     }
 
     /**
-     * 查询退款
+     * 提交退款
+     *
+     * @param array $params 查询退款
+     *
+     * @return array
      */
-    public function queryRefund($params){
+    public function queryRefund($params)
+    {
         $interface = 'unified.trade.refundquery';
         //必选参数
         $requiredInput = ['mch_id'];
         $allParams = array_merge($this->conf, $params);
-        $lostParams = $this->paramCheck($allParams, $requiredInput);
+        $lostParams = $this->_paramCheck($allParams, $requiredInput);
         if (!empty($lostParams)) {
             return ['status'=>501,'msg'=>'缺少必要参数','data'=>$lostParams];
         }
@@ -317,9 +346,9 @@ Class Request{
         }
 
         $this->reqHandler->setReqParams($allParams, array('method'));
-        $this->paramAppend($allParams, $interface);
+        $this->_paramAppend($allParams, $interface);
 
-        $ret = $this->doRequest();
+        $ret = $this->_doRequest();
         if (empty($ret)) {
             return ['status'=>502,'message'=>$this->pay->getErrInfo(),'data'=>[]];
         }
@@ -327,32 +356,42 @@ Class Request{
         $result = $this->resHandler->parseContent($result);
         return $result;
     }
-    
+
+
     /**
-     * 提供给威富通的回调方法
+     * 提交退款
+     *
+     * @param Closure $closure 提供给威富通的回调方法
+     *
+     * @return array
      */
-    public function callback(Closure $closure){
+    public function callback(Closure $closure)
+    {
         $xml = file_get_contents('php://input');
-        //$res = Utils::parseXML($xml);
         $this->resHandler->setContent($xml);
-		//var_dump($this->resHandler->setContent($xml));
         $this->resHandler->setKey($this->cfg->C('key'));
-        if(!$this->resHandler->isTenpaySign()){
+        if (!$this->resHandler->isTenpaySign()) {
             $this->resHandler->fail = 'check sign failed';
             $this->resHandler->toResponse();
         }
-        if($this->resHandler->getParameter('status') != 0 || $this->resHandler->getParameter('result_code') != 0){
+        if ($this->resHandler->getParameter('status') != 0
+            || $this->resHandler->getParameter('result_code') != 0
+        ) {
             $this->resHandler->fail('check status and code failed');
             $this->resHandler->toResponse();
         }
         //支付成功回调逻辑
         $message = $this->resHandler->getAllParameters();
-        $result = call_user_func($closure, $message, [$this, 'fail']);
+        call_user_func($closure, $message, [$this, 'fail']);
         $this->resHandler->toResponse();
     }
 
     /**
-     * @param mixed $result
+     * 回调检查
+     *
+     * @param mixed $result 回调内容
+     *
+     * @return null
      */
     protected function strict($result)
     {
@@ -362,7 +401,11 @@ Class Request{
     }
 
     /**
-     * @param string $message
+     * 回调失败处理
+     *
+     * @param string $message 回调失败返回的消息
+     *
+     * @return null
      */
     public function fail(string $message)
     {
