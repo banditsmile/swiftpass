@@ -23,34 +23,19 @@ class HttpClient {
     //请求内容，无论post和get，都用get方式提供
     var $reqContent = array();
     //应答内容
-    var $resContent;
+    var $resContent='';
 
     //错误信息
     var $errInfo;
 
     //超时时间
-    var $timeOut;
+    var $timeOut=120;
 
     //http状态码
-    var $responseCode;
+    var $responseCode=0;
 
     public function __construct()
     {
-        $this->PayHttpClient();
-    }
-
-
-    public function PayHttpClient()
-    {
-        $this->reqContent = "";
-        $this->resContent = "";
-
-        $this->errInfo = "";
-
-        $this->timeOut = 120;
-
-        $this->responseCode = 0;
-
     }
 
     //设置请求内容

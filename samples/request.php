@@ -8,7 +8,9 @@
  * 
  * ================================================================
  */
-include_once  '../autoload.php';
+include_once  '../vendor/autoload.php';
+
+use bandit\swiftpass\alipay\code\Request;
 
 Class Controller{
     //$url = 'http://192.168.1.185:9000/pay/gateway';
@@ -21,12 +23,11 @@ Class Controller{
     public function __construct(){
         $this->cfg =  array(
             'url'=>'https://pay.swiftpass.cn/pay/gateway',
-            'mchId'=>'101520000465',
+            'mch_id'=>'101520000465',
             'key'=>'58bb7db599afc86ea7f7b262c32ff42f',  /* MD5密钥 */
             'version'=>'1.0',
             'sign_type'=>'MD5'
         );
-
     }
 
     
@@ -58,7 +59,7 @@ Class Controller{
      * 提交订单信息
      */
     public function submitOrderInfo(){
-        $request = new \bandit\swiftpass\alipay\code\Request($this->cfg);
+        $request = new Request($this->cfg);
         $param = [
             'out_trade_no'=>'1111184328042380',
             'body'=>'test',

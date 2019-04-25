@@ -10,5 +10,11 @@
             "email": "banditsmile@qq.com"
         }
     ],
-    "require": {}
+    "require": {},
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "bandit\\swiftpass\\": "src/"
+        }
+    }
 }

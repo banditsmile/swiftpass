@@ -57,7 +57,6 @@ Class Request{
     private $conf = [];
     
     public function __construct($conf) {
-        $this->Request();
         $this->conf = $conf;
         $this->resHandler = new ResponseHandler();
         $this->reqHandler = new RequestHandler();
