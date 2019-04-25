@@ -8,13 +8,9 @@
  * 
  * ================================================================
  */
-require('Utils.class.php');
-require('config/config.php');
-require('class/RequestHandler.class.php');
-require('class/ClientResponseHandler.class.php');
-require('class/PayHttpClient.class.php');
+include_once  '../autoload.php';
 
-Class Request{
+Class Controller{
     //$url = 'http://192.168.1.185:9000/pay/gateway';
 
     private $resHandler = null;
@@ -23,29 +19,16 @@ Class Request{
     private $cfg = null;
     
     public function __construct(){
-        $this->Request();
+        $this->cfg =  array(
+            'url'=>'https://pay.swiftpass.cn/pay/gateway',
+            'mchId'=>'101520000465',
+            'key'=>'58bb7db599afc86ea7f7b262c32ff42f',  /* MD5密钥 */
+            'version'=>'1.0',
+            'sign_type'=>'MD5'
+        );
+
     }
 
-    public function Request(){
-        $this->resHandler = new ClientResponseHandler();
-        $this->reqHandler = new RequestHandler();
-        $this->pay = new PayHttpClient();
-        $this->cfg = new Config();
-
-        $this->reqHandler->setGateUrl($this->cfg->C('url'));
-
-        $sign_type = $this->cfg->C('sign_type');
-        
-        if ($sign_type == 'MD5') {
-            $this->reqHandler->setKey($this->cfg->C('key'));
-            $this->resHandler->setKey($this->cfg->C('key'));
-            $this->reqHandler->setSignType($sign_type);
-        } else if ($sign_type == 'RSA_1_1' || $sign_type == 'RSA_1_256') {
-            $this->reqHandler->setRSAKey($this->cfg->C('private_rsa_key'));
-            $this->resHandler->setRSAKey($this->cfg->C('public_rsa_key'));
-            $this->reqHandler->setSignType($sign_type);
-        }
-    }
     
     public function index(){
         $method = isset($_REQUEST['method'])?$_REQUEST['method']:'submitOrderInfo';
@@ -75,45 +58,16 @@ Class Request{
      * 提交订单信息
      */
     public function submitOrderInfo(){
-        $this->reqHandler->setReqParams($_POST,array('method'));
-        // $this->reqHandler->setParameter('service','pay.weixin.native');//接口类型：pay.weixin.native  表示微信扫码
-     $this->reqHandler->setParameter('service','pay.alipay.native');//接口类型：pay.alipay.native  表示支付宝扫码
-        // $this->reqHandler->setParameter('service','pay.jdpay.native');//接口类型：pay.jdpay.native   表示京东钱包扫码
-        // $this->reqHandler->setParameter('service','pay.unionpay.native');//接口类型：pay.unionpay.native   表示银联钱包扫码
-        $this->reqHandler->setParameter('mch_id',$this->cfg->C('mchId'));//必填项，商户号，由威富通分配
-        $this->reqHandler->setParameter('version',$this->cfg->C('version'));
-        $this->reqHandler->setParameter('sign_type',$this->cfg->C('sign_type'));
-        // $this->reqHandler->setParameter('limit_credit_pay', '1');
-        
-        //通知地址，必填项，接收威富通通知的URL，需给绝对路径，255字符内格式如:http://wap.tenpay.com/tenpay.asp
-        //$notify_url = 'http://'.$_SERVER['HTTP_HOST'];
-		$this->reqHandler->setParameter('notify_url','http://dawei.dev.swiftpass.cn/payInterface_native_alipay/request.php?method=callback');
-        $this->reqHandler->setParameter('nonce_str',mt_rand(time(),time()+rand()));//随机字符串，必填项，不长于 32 位
-        $this->reqHandler->createSign();//创建签名
-        
-        $data = Utils::toXml($this->reqHandler->getAllParameters());
-        
-        $this->pay->setReqContent($this->reqHandler->getGateURL(),$data);
-        if($this->pay->call()){
-            $this->resHandler->setContent($this->pay->getResContent());
-            $this->resHandler->setKey($this->reqHandler->getKey());
-            if($this->resHandler->isTenpaySign()){
-                //当返回状态与业务结果都为0时才返回支付二维码，其它结果请查看接口文档
-                if($this->resHandler->getParameter('status') == 0 && $this->resHandler->getParameter('result_code') == 0){
-                    echo json_encode(array('code_img_url'=>$this->resHandler->getParameter('code_img_url'),
-                                           'code_url'=>$this->resHandler->getParameter('code_url'),
-                                           'code_status'=>$this->resHandler->getParameter('code_status'),
-                                           'type'=>$this->reqHandler->getParameter('service')), JSON_UNESCAPED_SLASHES);
-                    exit();
-                }else{
-                    echo json_encode(array('status'=>500,'msg'=>'Error Code:'.$this->resHandler->getParameter('err_code').' Error Message:'.$this->resHandler->getParameter('err_msg')));
-                    exit();
-                }
-            }
-            echo json_encode(array('status'=>500,'msg'=>'Error Code:'.$this->resHandler->getParameter('status').' Error Message:'.$this->resHandler->getParameter('message')));
-        }else{
-            echo json_encode(array('status'=>500,'msg'=>'Response Code:'.$this->pay->getResponseCode().' Error Info:'.$this->pay->getErrInfo()));
-        }
+        $request = new \bandit\swiftpass\alipay\code\Request($this->cfg);
+        $param = [
+            'out_trade_no'=>'1111184328042380',
+            'body'=>'test',
+            'total_fee'=>1,
+            'notify_url'=>'http://111.baidu.com'
+        ];
+        $result = $request->order($param);
+        echo json_encode($result);
+        exit();
     }
 
     /**
@@ -329,6 +283,6 @@ Class Request{
     }
 }
 
-$req = new Request();
+$req = new Controller();
 $req->index();
 ?>

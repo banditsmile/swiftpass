@@ -2,6 +2,7 @@
     "name": "bandit/swiftpass",
     "homepage": "https://github.com/banditsmile/swiftpass",
     "description": "switfpass sdk",
+    "version":"1.0.0",
     "authors": [
         {
             "name": "banditsmile",

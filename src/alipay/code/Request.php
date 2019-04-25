@@ -147,7 +147,7 @@ Class Request{
      * @param $params
      *
      */
-    public function submitOrderInfo(array $params)
+    public function order(array $params)
     {
         $interface = 'pay.alipay.native';
         //必选参数
