@@ -29,7 +29,6 @@ Class Controller{
             'sign_type'=>'MD5'
         );
     }
-
     
     public function index(){
         $method = isset($_REQUEST['method'])?$_REQUEST['method']:'submitOrderInfo';
