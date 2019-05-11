@@ -171,4 +171,5 @@ Class Controller{
 
 $req = new Controller();
 $req->index();
+
 ?>
